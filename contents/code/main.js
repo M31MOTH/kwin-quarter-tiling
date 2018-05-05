@@ -93,6 +93,7 @@ function Activity() {
 
   this.add = function(client) {
     if (!self.eligible(client)) return;
+
     self.original[client.windowId] = Qt.rect(
       client.geometry.x,
       client.geometry.y,
@@ -122,7 +123,8 @@ function Activity() {
   };
 
   this.reset = function(client) {
-    var original = this.original[client.windowId];
+    // Note: The older instance has to be removed, since it will not be overwritten
+    var original = this.original.splice(client.windowId, 1)[0];
 
     client.geometry.width = original.width;
     client.geometry.height = original.height;
@@ -206,14 +208,7 @@ function Activity() {
     // TODO
   });
 
-  workspace.clientMaximizeSet.connect(function(client, h, v) {
-    if (h && v) {
-      // Maximize the original geometry before removing and reverting
-      var screen = self.desktops[client.desktop].screens[client.screen];
-      this.original[client.windowId] = screen.geometry;
-      self.remove(client);
-    }
-  });
+  workspace.clientMaximizeSet.connect(function(client, h, v) {});
 
   workspace.numberDesktopsChanged(function(oldDesktops) {
     // TODO
